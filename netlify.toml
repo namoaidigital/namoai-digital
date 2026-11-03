@@ -1,0 +1,28 @@
+exports.handler = async (event) => {
+  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method Not Allowed" };
+  try {
+    const { type, prompt, brand } = JSON.parse(event.body || "{}");
+    const sys = `You are an expert AI employee of NamoAI Digital for brand ${brand?.name||""} in ${brand?.city||"India"}. Reply in practical Hinglish/English, ready to use. Task type: ${type}. User request: ${prompt}`;
+    // 1. Pehle Gemini try karo (sasta + fast)
+    if (process.env.GEMINI_API_KEY) {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${process.env.GEMINI_MODEL||"gemini-2.0-flash"}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ contents: [{ parts: [{ text: sys }] }] })
+      });
+      const d = await r.json();
+      const text = d?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return ok(text);
+    }
+    // 2. Gemini fail to OpenAI
+    if (process.env.OPENAI_API_KEY) {
+      const r = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST", headers: {"Content-Type":"application/json","Authorization":`Bearer ${process.env.OPENAI_API_KEY}`},
+        body: JSON.stringify({ model: process.env.OPENAI_MODEL||"gpt-4o-mini", messages: [{role:"user",content:sys}] })
+      });
+      const d = await r.json();
+      if (d?.choices?.[0]?.message?.content) return ok(d.choices[0].message.content);
+    }
+    return ok(""); // Key nahi hai to frontend demo mode chalega
+  } catch(e) { return { statusCode: 500, body: JSON.stringify({ error: e.message }) }; }
+  function ok(text){ return { statusCode:200, headers:{"Content-Type":"application/json"}, body: JSON.stringify({text}) } }
+};
