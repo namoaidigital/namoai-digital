@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NamoAI Digital - 10 AI Employees. One Agency.</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>body{background:#070b16}.card{background:#101827;border:1px solid #1e293b;border-radius:16px}.inp{background:#0b1220;border:1px solid #243044;border-radius:10px;padding:12px;width:100%}.btn{background:#ff6a00;color:#fff;padding:10px 18px;border-radius:10px;font-weight:700}.nav button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;color:#cbd5e1}.nav button:hover,.nav button.act{background:#2a1a0d;color:#ff8a2a}</style>
+</head>
+<body class="text-white">
+
+<!-- LOGIN -->
+<div id="login" class="min-h-screen grid md:grid-cols-2">
+ <div class="p-10 flex flex-col justify-center bg-gradient-to-br from-slate-900 to-black">
+  <div class="text-2xl font-bold">Namo<span class="text-orange-500">AI Digital</span></div>
+  <p class="text-orange-400 tracking-widest text-xs mt-10">AI DIGITAL MARKETING AGENCY</p>
+  <h1 class="text-5xl font-extrabold mt-4">10 AI employees.<br><span class="text-orange-500">One agency.</span></h1>
+  <p class="text-slate-400 mt-4">Strategy, SEO, ads, content, email, web, design and video - run by AI, billed in credits.</p>
+ </div>
+ <div class="p-8 flex items-center justify-center"><div class="w-full max-w-md">
+  <h2 class="text-3xl font-bold">Welcome back</h2>
+  <p class="text-slate-400 mt-2">Explore the dashboard free. Pick a plan when you're ready.</p>
+  <input id="email" class="inp mt-6" placeholder="Email" value="namocartsupport@gmail.com">
+  <input id="pass" type="password" class="inp mt-3" placeholder="Password (min 6)">
+  <button onclick="doLogin()" class="btn w-full mt-4">Log in</button>
+  <button onclick="doLogin()" class="w-full bg-white text-black py-3 rounded-xl mt-3 font-bold">G Continue with Google</button>
+  <p class="text-center text-sm mt-4 text-slate-400">New here? <a class="text-orange-400" href="#" onclick="doLogin()">Create an account</a></p>
+ </div></div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+<aside class="fixed w-60 h-full bg-[#0b1120] p-4 hidden lg:block overflow-auto">
+ <div class="text-xl font-bold">Namo<span class="text-orange-500">AI Digital</span></div>
+ <nav class="nav mt-8 space-y-1 text-sm" id="nav"></nav>
+ <div class="mt-8 text-sm"><b>Admin</b><p class="text-slate-400 text-xs" id="adminMail"></p><button onclick="location.reload()" class="mt-3 text-slate-300">Log out</button></div>
+</aside>
+
+<main class="lg:ml-60 p-4">
+<header class="flex flex-wrap gap-3 items-center justify-between card p-3">
+ <div class="flex gap-2 items-center"><select id="brandSel" onchange="setBrand(this.value)" class="inp !w-auto"></select>
+ <button onclick="openBrand()" class="btn !py-2">+ Brand</button><span class="text-sm text-slate-300">Plan: <b id="planName">Owner</b></span></div>
+ <div class="flex gap-2"><span class="bg-orange-900/40 text-orange-300 px-3 py-2 rounded-full text-xs">Demo mode</span>
+ <span class="bg-slate-800 px-3 py-2 rounded-full text-xs">Credits: <b id="credits">Unlimited</b></span>
+ <button onclick="openPricing()" class="btn !py-2">+ Buy Plan</button></div>
+</header>
+<div class="lg:hidden flex gap-2 overflow-x-auto mt-3" id="mnav"></div>
+<div id="pages" class="mt-5"></div>
+</main>
+</div>
+
+<!-- BRAND MODAL -->
+<div id="brandModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"><div class="card p-6 w-full max-w-2xl">
+<h3 class="text-2xl font-bold">Add a brand</h3>
+<div class="grid md:grid-cols-2 gap-3 mt-4">
+<input id="bName" class="inp" placeholder="Business name *"><input id="bCity" class="inp" placeholder="City *">
+<input id="bWeb" class="inp md:col-span-2" placeholder="Website URL *">
+<input id="bInsta" class="inp" placeholder="Instagram link"><input id="bFb" class="inp" placeholder="Facebook link">
+<input id="bLi" class="inp" placeholder="LinkedIn link"><input id="bYt" class="inp" placeholder="YouTube link"></div>
+<label class="text-sm mt-3 block"><input type="checkbox" checked> Run website audit now (10 credits)</label>
+<div class="text-right mt-4"><button onclick="closeBrand()" class="mr-2">Cancel</button><button onclick="addBrand()" class="btn">Add brand</button></div>
+</div></div>
+
+<!-- PRICING MODAL -->
+<div id="priceModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"><div class="card p-6 w-full max-w-4xl">
+<button class="float-right" onclick="closePricing()">✕</button><h3 class="text-2xl font-bold">Choose your plan</h3>
+<div class="grid md:grid-cols-4 gap-3 mt-5 text-center" id="plans"></div>
+<p class="text-xs text-slate-400 mt-4">Secure payment by Razorpay. +918700746939 | support@namoai.digital</p>
+</div></div>
+
+<!-- CHAT MODAL -->
+<div id="chatModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"><div class="card p-5 w-full max-w-xl">
+<button class="float-right" onclick="chatModal.classList.add('hidden')">✕</button>
+<h3 id="chatName" class="font-bold text-xl"></h3><div id="chatBox" class="h-64 overflow-auto bg-slate-900 rounded p-3 mt-3 text-sm space-y-2"></div>
+<div class="flex gap-2 mt-3"><input id="chatInp" class="inp" placeholder="Ask your AI employee..."><button class="btn" onclick="sendChat()">Send</button></div>
+</div></div>
+
+<div id="toast" class="hidden fixed bottom-5 right-5 bg-green-600 px-4 py-2 rounded z-[60]">Done</div>
+
+<script>
+const RAZORPAY_KEY_ID=""; // <-- Apni public key yahan ya demo mode rakho
+let state=JSON.parse(localStorage.getItem('namo')||'{"brands":[{"name":"Paras Tally Academy","city":"Delhi","web":"https://www.parastallyacademy.com/"}],"active":0,"tasks":50,"credits":"Unlimited","plan":"Owner","scheduled":[]}');
+let emp=[["Alex","Chief Marketing Strategist"],["Sophia","SEO, AEO & GEO Specialist"],["Ethan","Performance Ads Director"],["Olivia","Content & Copy Lead"],["Liam","Social Media Manager"],["Emma","Email Marketing Specialist"],["Noah","Web Developer & CRO"],["Ava","Creative Designer"],["Lucas","Video Producer"],["Mia","Market Research Analyst"]];
+let menus=[["dashboard","Dashboard"],["employees","AI Employees"],["research","Research & PPT"],["seo","SEO AEO GEO"],["ads","Ads Manager"],["content","Content Studio"],["email","Email Studio"],["website","Website Builder"],["image","Image Studio"],["video","Video Studio"],["social","Social Media"],["scheduler","Scheduler"],["margins","Pricing & Margins"],["admin","Admin Panel"]];
+let curEmp="Alex";
+function save(){localStorage.setItem('namo',JSON.stringify(state))}
+function brand(){return state.brands[state.active]||state.brands[0]}
+function toast(m){let t=document.getElementById('toast');t.innerText=m;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),1800)}
+function copyT(t){navigator.clipboard.writeText(t);toast('Copied')}
+function doLogin(){login.classList.add('hidden');app.classList.remove('hidden');adminMail.innerText=email.value;render()}
+async function callAI(type,prompt){
+ try{let r=await fetch('/.netlify/functions/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,prompt,brand:brand()})});let d=await r.json();if(d.text)return d.text;throw 0}catch(e){
+  return demo(type,prompt)}}
+function demo(type,p){
+ let b=brand();let map={research:`MARKET RESEARCH: ${p}\n\n• Market size & demand growing in ${b.city}\n• Audience: decision makers looking for trusted, practical outcomes\n• Competitors: focus on offers & reels, weak on trust content\n• Opportunity for ${b.name}: credibility + local SEO + demo/lead campaign\n• 30-day plan: 12 reels, 8 offer posts, 2 lead ads, weekly blog`,seo:`SEO AUDIT for ${b.web}\nSEO 65 | AEO 44 | GEO 14 | Social 21\nFix: title tags, FAQ schema, Google Business posts, location pages, answer-style blogs for AI search.`,ads:`AD PACK: ${p}\n\nHeadlines:\n1. Best choice in ${b.city} - Enquire Today\n2. Trusted by Happy Customers\n3. Limited Offer - Book Free Demo\n\nPrimary Text: ${b.name} brings you the best quality with trusted service in ${b.city}. Limited period offer. DM / WhatsApp now!\nAudience: ${b.city}+15km, 25-54, Interested buyers\nKeywords: ${p}, near me, best price, ${b.city}\nBudget Plan: Test 3 creatives, kill low CTR in 3 days, scale winner.`,content:`Title: ${p}\n\nHook: Ruko! Ye galti mat karna!\n\n${b.name} ke saath sahi choice karna ab easy hai. Quality, trust aur best support - sab ek jagah.\n\nCaption: Save this post 🔥 DM to know more\nHashtags: #${b.name.replace(/ /g,'')} #${b.city} #viral #reels #india #trending`,email:`Subject: Special Offer Only For You 🎉\n\nNamaste,\n${b.name} laya hai limited time offer. Best quality, trusted service.\n\n[Shop Now / Book Demo]\n\nTeam ${b.name}`,website:`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:Arial;background:#0b1120;color:#fff;text-align:center;padding:60px}h1{color:#ff6a00}.b{background:#ff6a00;color:#fff;padding:14px 28px;border-radius:30px;text-decoration:none}</style></head><body><h1>${b.name}</h1><p>${p}</p><br><a class="b" href="#">Book Free Demo</a></body></html>`,video:`REEL SCRIPT: ${p}\n0-3s Hook: Ruko! Ye galti mat karna!\n3-20s: Problem samjhao\n20-40s: ${b.name} ka solution dikhao\n40-50s: Proof / result\nEnd CTA: DM "DEMO" to start\nHindi Voiceover Line: Namaste doston, aaj hum aapke liye laaye hain sabse best solution!`,chat:`${curEmp} (${brand().name}): ${p} ke liye best strategy ye hai - pehle trust content, fir offer post, fir retargeting ad. Main aapko step-by-step plan bana deta hu: 1) Hook reel 2) Proof post 3) Lead ad 4) WhatsApp follow-up.`};
+ return map[type]||map.content}
+function render(){
+ nav.innerHTML=menus.map(m=>`<button onclick="show('${m[0]}')" data-p="${m[0]}">${m[1]}</button>`).join('');
+ mnav.innerHTML=menus.map(m=>`<button onclick="show('${m[0]}')" class="bg-slate-800 px-3 py-1 rounded text-xs whitespace-nowrap">${m[1]}</button>`).join('');
+ brandSel.innerHTML=state.brands.map((b,i)=>`<option value="${i}">${b.name}</option>`).join('');brandSel.value=state.active;
+ credits.innerText=state.credits;planName.innerText=state.plan;
+ pages.innerHTML=`
+ <section id="p-dashboard" class="page"><div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+  ${[['CREDITS',state.credits],['TASKS RUN',state.tasks],['CREDITS USED',state.plan=='Owner'?0:120],['SEO SCORE',65]].map(x=>`<div class="card p-5"><p class="text-orange-400 text-xs">${x[0]}</p><h3 class="text-3xl font-bold mt-2">${x[1]}</h3></div>`).join('')}</div>
+  <div class="card p-5 mt-4"><h3 class="font-bold">Audit comparison</h3><div class="grid md:grid-cols-4 gap-3 mt-4">${[['SEO',65],['AEO',44],['GEO',14],['SOCIAL',21]].map(x=>`<div class="bg-slate-900 p-4 rounded-xl">${x[0]}<h4 class="text-2xl font-bold">${x[1]}</h4><div class="bg-slate-700 h-2 rounded mt-2"><div class="bg-orange-500 h-2 rounded" style="width:${x[1]}%"></div></div></div>`).join('')}</div></div></section>
+
+ <section id="p-employees" class="page hidden"><h2 class="text-3xl font-bold">AI Employees</h2><div class="grid md:grid-cols-3 xl:grid-cols-5 gap-4 mt-4">${emp.map(e=>`<div class="card p-5"><div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center font-bold text-xl">${e[0][0]}<span class="w-3 h-3 bg-green-400 rounded-full ml-1"></span></div><h3 class="font-bold mt-3">${e[0]}</h3><p class="text-orange-400 text-sm">${e[1]}</p><button onclick="openChat('${e[0]}')" class="mt-4 text-sm">💬 Start chat</button></div>`).join('')}</div></section>
+
+ ${tool('research','RESEARCH & PPT STUDIO','Market research and pitch decks','e.g. Organic skincare D2C market in India','Generate','10 credits')}
+ ${tool('seo','SEO AEO GEO','Website audit','https://yourwebsite.com','Re-run audit','10 credits')}
+ ${tool('ads','ADS MANAGER','Ad packs + keyword research','What should this campaign promote? Google / Meta / LinkedIn','Generate ad pack','12 credits')}
+ ${tool('content','CONTENT STUDIO','Blogs, articles and social bundles','Topic, target keyword, audience... Blog / Article / Social, Hinglish tone','Generate','10 credits')}
+ ${tool('email','EMAIL STUDIO','Responsive HTML emails','e.g. Diwali sale email, 30% off, for a jewellery brand','Generate email','8 credits')}
+ ${tool('website','WEBSITE BUILDER','Prompt to landing page','e.g. Landing page for a Pune yoga studio with pricing and form','Generate site','15 credits')}
+ ${tool('video','VIDEO STUDIO','Reel scripts & Hindi voiceover','e.g. 5 tips reel for my brand in Hindi','Generate script','10 credits')}
+
+ <section id="p-image" class="page hidden"><p class="text-orange-400 text-xs">IMAGE STUDIO</p><h2 class="text-3xl font-bold mt-1">AI image generation</h2>
+ <div class="card p-5 mt-4"><textarea id="in-image" class="inp" rows="3" placeholder="Describe what you want to create..."></textarea>
+ <div class="flex gap-2 mt-3"><select id="imgSize" class="inp !w-auto"><option>1024x1024</option><option>1024x1792</option><option>1792x1024</option></select><button class="btn" onclick="genImage()">Generate Image • 15cr</button></div>
+ <div id="out-image" class="mt-4"></div></div></section>
+
+ <section id="p-social" class="page hidden"><p class="text-orange-400 text-xs">SOCIAL MEDIA MANAGER</p><h2 class="text-3xl font-bold mt-1">${brand().name} • this week</h2>
+ <p class="text-slate-400">7 days posts with images, captions and hashtags.</p>
+ <div class="flex gap-2 mt-3"><button class="btn" onclick="genSocial()">🔄 New week</button><button class="bg-slate-800 px-4 rounded" onclick="window.print()">PDF</button><button class="bg-slate-800 px-4 rounded" onclick="downloadWord()">Word</button></div>
+ <div class="card p-4 mt-4"><b>Brand style preset</b><p class="text-sm text-slate-400">Colours auto-detected from logo & website.</p></div><div id="socialOut" class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mt-4"></div></section>
+
+ <section id="p-scheduler" class="page hidden"><h2 class="text-3xl font-bold">Scheduler</h2><div id="schOut" class="card p-5 mt-4 text-sm">No scheduled posts yet. Social Media se Schedule dabao.</div></section>
+
+ <section id="p-margins" class="page hidden"><h2 class="text-3xl font-bold">Pricing & Margins</h2><div class="card p-5 mt-4 grid md:grid-cols-3 gap-3"><input id="mCost" type="number" class="inp" placeholder="Your cost ₹" value="1000"><input id="mMargin" type="number" class="inp" placeholder="Margin %" value="50"><button class="btn" onclick="marginCalc()">Calculate</button><div id="mOut" class="md:col-span-3"></div></div></section>
+
+ <section id="p-admin" class="page hidden"><h2 class="text-3xl font-bold">Admin Panel</h2><div class="card p-5 mt-4 overflow-auto"><table class="w-full text-sm min-w-[500px]"><tr class="text-left"><th>User</th><th>Plan</th><th>Brands</th><th>Tasks</th></tr><tr><td>${email.value}</td><td>${state.plan}</td><td>${state.brands.length}</td><td>${state.tasks}</td></tr></table><p class="text-xs text-slate-400 mt-3">Real multi-user admin ke liye Supabase connect hoga - Part 2 me.</p></div></section>`;
+ show('dashboard');
+}
+function tool(id,tag,title,ph,btn,cr){return `<section id="p-${id}" class="page hidden"><p class="text-orange-400 text-xs">${tag}</p><h2 class="text-3xl font-bold mt-1">${title}</h2><div class="card p-5 mt-4"><textarea id="in-${id}" class="inp" rows="3" placeholder="${ph}"></textarea><div class="flex gap-3 mt-3 items-center"><span class="bg-orange-900/40 text-orange-300 px-3 py-1 rounded-full text-xs">${cr}</span><button class="btn" onclick="runTool('${id}')">✨ ${btn}</button></div><pre id="out-${id}" class="whitespace-pre-wrap bg-slate-900 rounded-xl p-4 mt-4 text-sm hidden"></pre><div id="extra-${id}"></div></div></section>`}
+function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));let e=document.getElementById('p-'+id);if(e)e.classList.remove('hidden')}
+async function runTool(id){let v=document.getElementById('in-'+id).value||brand().name;let o=document.getElementById('out-'+id);o.classList.remove('hidden');o.innerText='AI is working...';let txt=await callAI(id,v);o.innerText=txt;state.tasks++;save();credits.innerText=state.credits;
+ if(id=='website'){document.getElementById('extra-website').innerHTML=`<div class="flex gap-2 mt-3"><button class="btn" onclick='copyT(document.getElementById("out-website").innerText)'>Copy Code</button><button class="btn" onclick="dlSite()">Download</button></div><iframe class="w-full h-96 bg-white rounded-xl mt-3" srcdoc="${txt.replace(/"/g,'&quot;')}"></iframe>`}}
+function dlSite(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([document.getElementById('out-website').innerText],{type:'text/html'}));a.download='index.html';a.click()}
+async function genImage(){let p=document.getElementById('in-image').value||'Professional ad creative for '+brand().name;let o=document.getElementById('out-image');o.innerHTML='Generating image...';
+ try{let r=await fetch('/.netlify/functions/image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,size:document.getElementById('imgSize').value})});let d=await r.json();if(!d.url)throw 0;o.innerHTML=`<img src="${d.url}" class="rounded-xl max-w-lg w-full"><br><a href="${d.url}" download target="_blank" class="btn inline-block mt-3">Download Image</a>`}catch(e){o.innerHTML=`<img src="https://picsum.photos/seed/${Date.now()}/1024/1024" class="rounded-xl max-w-lg w-full"><p class="text-xs mt-2">Demo image - OpenAI key lagte hi real AI image aayegi.</p>`}}
+function genSocial(){let b=brand();let themes=['Brand credibility and trust','Social proof','Course / Product value','Variety & convenience','Educational tip','Special offer','Engagement'];socialOut.innerHTML=themes.map((t,i)=>`<div class="card overflow-hidden"><img src="https://picsum.photos/seed/namo${i+7}/600/600" class="h-52 w-full object-cover"><div class="p-4"><p class="text-xs text-slate-400">Day ${i+1} • ${i%2?'Instagram':'Facebook'} • 7:30 PM</p><h4 class="font-bold mt-1">${t}</h4><p class="text-sm mt-2">${b.name} in ${b.city} - trusted quality, practical results and best support. Book your demo today!</p><p class="text-blue-400 text-xs mt-2">#${b.name.replace(/ /g,'')} #${b.city} #viral #trending #india</p><div class="flex gap-2 mt-3"><button class="bg-slate-800 px-3 py-1 rounded text-xs" onclick="copyT('${t} by ${b.name}')">Copy post</button><button class="bg-blue-600 px-3 py-1 rounded text-xs" onclick="schedulePost('${t}')">Schedule</button></div></div></div>`).join('')}
+function schedulePost(t){state.scheduled.push(t);save();schOut.innerHTML=state.scheduled.map(s=>'✅ '+s+' - Scheduled 7:30 PM<br>').join('');toast('Scheduled')}
+function downloadWord(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([socialOut.innerText],{type:'application/msword'}));a.download='weekly-calendar.doc';a.click()}
+function marginCalc(){let c=+mCost.value||0,m=+mMargin.value||0;mOut.innerHTML=`<b>Selling Price: ₹${(c*(1+m/100)).toFixed(0)}</b> | Profit: ₹${(c*m/100).toFixed(0)}`}
+function openBrand(){brandModal.classList.remove('hidden')}function closeBrand(){brandModal.classList.add('hidden')}
+function addBrand(){if(!bName.value)return alert('Business name bharo');state.brands.push({name:bName.value,city:bCity.value,web:bWeb.value});state.active=state.brands.length-1;save();closeBrand();render();toast('Brand added')}
+function setBrand(i){state.active=+i;save();render()}
+function openChat(n){curEmp=n;chatName.innerText=n+' - AI Employee';chatBox.innerHTML='';chatModal.classList.remove('hidden')}
+async function sendChat(){let v=chatInp.value;if(!v)return;chatBox.innerHTML+=`<div><b>You:</b> ${v}</div>`;chatInp.value='';let r=await callAI('chat',v);chatBox.innerHTML+=`<div class="text-orange-200"><b>${curEmp}:</b> ${r.replace('chat:','')}</div>`;chatBox.scrollTop=9999}
+let plans=[['SOLO',1999,'600 credits'],['PRO',4999,'2,000 credits'],['AGENCY',14999,'7,500 credits'],['SCALE',39999,'25,000 credits']];
+function openPricing(){priceModal.classList.remove('hidden');plansEl()}function closePricing(){priceModal.classList.add('hidden')}
+function plansEl(){document.getElementById('plans').innerHTML=plans.map(p=>`<div class="bg-slate-900 p-4 rounded-xl"><p class="text-orange-400 text-xs">${p[0]}</p><h4 class="text-2xl font-bold">₹${p[1].toLocaleString()}</h4><p class="text-sm">per month<br>${p[2]}</p><button class="btn w-full mt-3" onclick="pay('${p[0]}',${p[1]})">Get ${p[0]}</button></div>`).join('')}
+function pay(plan,amt){if(RAZORPAY_KEY_ID){new Razorpay({key:RAZORPAY_KEY_ID,amount:amt*100,currency:'INR',name:'NamoAI Digital',description:plan,handler:()=>{state.plan=plan;save();closePricing();render()}}).open()}else if(confirm(`Demo Payment: ₹${amt} for ${plan} via Razorpay?`)){state.plan=plan;save();closePricing();render();alert('Payment Successful (Demo) - '+plan+' Activated')}}
+</script></body></html>
